@@ -1,0 +1,1 @@
+"""HyperScale Platform — Database Package."""

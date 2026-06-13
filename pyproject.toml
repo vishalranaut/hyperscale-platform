@@ -1,0 +1,174 @@
+[build-system]
+requires = ["setuptools>=75.0", "wheel>=0.44"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "hyperscale-platform"
+version = "1.0.0"
+description = "HyperScale Platform — Production-grade real-time microservices platform"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.12"
+authors = [
+    {name = "HyperScale Team", email = "team@hyperscale.dev"},
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Django :: 5.0",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+]
+
+dependencies = [
+    # Django & REST
+    "django>=5.1,<5.2",
+    "djangorestframework>=3.15,<4.0",
+    "django-cors-headers>=4.4,<5.0",
+
+    # ASGI & Channels
+    "daphne>=4.1,<5.0",
+    "channels>=4.1,<5.0",
+    "channels-redis>=4.2,<5.0",
+
+    # MongoDB
+    "motor>=3.6,<4.0",
+    "beanie>=1.26,<2.0",
+
+    # Redis
+    "redis[hiredis]>=5.2,<6.0",
+
+    # Kafka
+    "aiokafka>=0.11,<1.0",
+
+    # Auth
+    "PyJWT>=2.9,<3.0",
+    "cryptography>=43.0,<44.0",
+    "firebase-admin>=6.5,<7.0",
+    "python-jose[cryptography]>=3.3,<4.0",
+
+    # GraphQL
+    "strawberry-graphql[django]>=0.243,<1.0",
+
+    # Data validation
+    "pydantic>=2.9,<3.0",
+    "pydantic-settings>=2.6,<3.0",
+
+    # Logging
+    "structlog>=24.4,<25.0",
+
+    # HTTP
+    "httpx>=0.27,<1.0",
+
+    # Utilities
+    "python-dotenv>=1.0,<2.0",
+    "orjson>=3.10,<4.0",
+    "email-validator>=2.2,<3.0",
+    "Jinja2>=3.1,<4.0",
+    "phonenumbers>=8.13,<9.0",
+    "passlib[bcrypt]>=1.7,<2.0",
+    "python-multipart>=0.0.12",
+    "uvicorn[standard]>=0.32,<1.0",
+]
+
+[project.optional-dependencies]
+grpc = [
+    "grpcio>=1.67,<2.0",
+    "grpcio-tools>=1.67,<2.0",
+    "grpcio-reflection>=1.67,<2.0",
+    "grpcio-health-checking>=1.67,<2.0",
+    "protobuf>=5.28,<6.0",
+]
+monitoring = [
+    "opentelemetry-api>=1.28,<2.0",
+    "opentelemetry-sdk>=1.28,<2.0",
+    "opentelemetry-exporter-otlp>=1.28,<2.0",
+    "opentelemetry-instrumentation-django>=0.49b0",
+    "opentelemetry-instrumentation-httpx>=0.49b0",
+    "opentelemetry-instrumentation-redis>=0.49b0",
+    "prometheus-client>=0.21,<1.0",
+    "django-prometheus>=2.3,<3.0",
+]
+dev = [
+    "ruff>=0.8,<1.0",
+    "mypy>=1.13,<2.0",
+    "pre-commit>=4.0,<5.0",
+    "ipython>=8.29,<9.0",
+    "django-stubs>=5.1,<6.0",
+    "djangorestframework-stubs>=3.15,<4.0",
+]
+test = [
+    "pytest>=8.3,<9.0",
+    "pytest-asyncio>=0.24,<1.0",
+    "pytest-cov>=6.0,<7.0",
+    "pytest-django>=4.9,<5.0",
+    "pytest-mock>=3.14,<4.0",
+    "pytest-xdist>=3.5,<4.0",
+    "factory-boy>=3.3,<4.0",
+    "faker>=30.0,<31.0",
+    "httpx>=0.27,<1.0",
+    "testcontainers[mongodb,redis]>=4.8,<5.0",
+    "locust>=2.32,<3.0",
+    "respx>=0.21,<1.0",
+]
+all = [
+    "hyperscale-platform[grpc,monitoring,dev,test]",
+]
+
+[tool.setuptools.packages.find]
+include = ["shared*", "services*", "gateway*", "proto*"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["shared", "services", "gateway"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+    "SIM",  # flake8-simplify
+    "TCH",  # flake8-type-checking
+    "RUF",  # ruff-specific
+    "ASYNC",# flake8-async
+]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["shared", "services", "gateway"]
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+plugins = [
+    "mypy_django_plugin.main",
+    "pydantic.mypy",
+]
+
+[tool.django-stubs]
+django_settings_module = "services.user_service.settings"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["services", "gateway", "tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --tb=short --strict-markers"
+markers = [
+    "unit: Unit tests (no external dependencies)",
+    "integration: Integration tests (require running services)",
+    "slow: Slow tests",
+    "e2e: End-to-end tests",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]

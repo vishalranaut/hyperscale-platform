@@ -1,0 +1,73 @@
+# ── Python ───────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.whl
+
+# ── Virtual Environments ────────────────
+.venv/
+venv/
+ENV/
+env/
+
+# ── IDE ──────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# ── Environment / Secrets ────────────────
+.env
+.env.local
+.env.production
+*.pem
+*.key
+firebase-service-account.json
+
+# ── Testing / Coverage ──────────────────
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Django ───────────────────────────────
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+static_collected/
+
+# ── gRPC Generated ──────────────────────
+*_pb2.py
+*_pb2_grpc.py
+*_pb2.pyi
+
+# ── Containers ───────────────────────────
+.podman/
+*.tar
+
+# ── OS ───────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Misc ─────────────────────────────────
+*.bak
+*.tmp
+*.temp
+node_modules/

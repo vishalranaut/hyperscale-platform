@@ -1,0 +1,166 @@
+// HyperScale Platform — Product Service gRPC Definition
+// Inter-service RPC interface for product catalog and inventory management.
+
+syntax = "proto3";
+
+package hyperscale.product;
+
+import "common.proto";
+
+option java_multiple_files = true;
+option java_package = "dev.hyperscale.proto.product";
+
+// ── Service Definition ────────────────────────────────────────────────────
+
+service ProductService {
+  // Get a single product by ID.
+  rpc GetProduct(ProductIdRequest) returns (ProductResponse);
+
+  // Get multiple products by IDs.
+  rpc GetProducts(ProductIdsRequest) returns (ProductsResponse);
+
+  // Check current inventory levels for one or more products.
+  rpc CheckInventory(InventoryCheckRequest) returns (InventoryResponse);
+
+  // Reserve inventory for an order (decrements available stock).
+  rpc ReserveInventory(ReserveRequest) returns (ReserveResponse);
+
+  // Release previously reserved inventory (on order cancellation).
+  rpc ReleaseInventory(ReleaseRequest) returns (ReleaseResponse);
+
+  // Health check.
+  rpc HealthCheck(hyperscale.common.Empty) returns (hyperscale.common.HealthCheckResponse);
+}
+
+// ── Request Messages ──────────────────────────────────────────────────────
+
+message ProductIdRequest {
+  string product_id = 1;
+  bool include_variants = 2;
+}
+
+message ProductIdsRequest {
+  repeated string product_ids = 1;
+  bool include_variants = 2;
+}
+
+message InventoryCheckRequest {
+  repeated InventoryCheckItem items = 1;
+}
+
+message InventoryCheckItem {
+  string product_id = 1;
+  string variant_id = 2; // Optional — empty string means base product
+  int32 requested_quantity = 3;
+}
+
+message ReserveRequest {
+  string order_id = 1;
+  repeated ReserveItem items = 2;
+  int32 reservation_ttl_seconds = 3; // Default: 900 (15 min)
+}
+
+message ReserveItem {
+  string product_id = 1;
+  string variant_id = 2;
+  int32 quantity = 3;
+}
+
+message ReleaseRequest {
+  string order_id = 1;
+  string reservation_id = 2;
+  repeated ReleaseItem items = 3;
+}
+
+message ReleaseItem {
+  string product_id = 1;
+  string variant_id = 2;
+  int32 quantity = 3;
+}
+
+// ── Response Messages ─────────────────────────────────────────────────────
+
+message ProductResponse {
+  string id = 1;
+  string sku = 2;
+  string title = 3;
+  string description = 4;
+  hyperscale.common.Money price = 5;
+  hyperscale.common.Money compare_price = 6;
+  repeated string images = 7;
+  string category_id = 8;
+  string brand = 9;
+  map<string, string> attributes = 10;
+  repeated VariantResponse variants = 11;
+  InventoryInfo inventory = 12;
+  string status = 13; // "draft", "active", "archived"
+  repeated string tags = 14;
+  float rating = 15;
+  int32 review_count = 16;
+  hyperscale.common.Timestamp created_at = 17;
+  hyperscale.common.Timestamp updated_at = 18;
+}
+
+message VariantResponse {
+  string id = 1;
+  string sku = 2;
+  map<string, string> attributes = 3;
+  hyperscale.common.Money price = 4;
+  int32 stock = 5;
+  repeated string images = 6;
+}
+
+message InventoryInfo {
+  int32 stock_quantity = 1;
+  int32 reserved = 2;
+  int32 available = 3; // stock_quantity - reserved
+  int32 threshold = 4; // Low stock alert threshold
+  string warehouse_id = 5;
+  bool track_inventory = 6;
+}
+
+message ProductsResponse {
+  repeated ProductResponse products = 1;
+  int32 total = 2;
+}
+
+message InventoryResponse {
+  repeated InventoryStatusItem items = 1;
+  bool all_available = 2;
+}
+
+message InventoryStatusItem {
+  string product_id = 1;
+  string variant_id = 2;
+  int32 requested_quantity = 3;
+  int32 available_quantity = 4;
+  bool is_available = 5;
+}
+
+message ReserveResponse {
+  bool success = 1;
+  string reservation_id = 2;
+  repeated ReservationDetail details = 3;
+  string error_message = 4;
+}
+
+message ReservationDetail {
+  string product_id = 1;
+  string variant_id = 2;
+  int32 reserved_quantity = 3;
+  bool success = 4;
+  string error = 5;
+}
+
+message ReleaseResponse {
+  bool success = 1;
+  string message = 2;
+  repeated ReleaseDetail details = 3;
+}
+
+message ReleaseDetail {
+  string product_id = 1;
+  string variant_id = 2;
+  int32 released_quantity = 3;
+  bool success = 4;
+}

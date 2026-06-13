@@ -1,0 +1,79 @@
+// HyperScale Platform — Common Protobuf Definitions
+// Shared types used across all service proto definitions.
+
+syntax = "proto3";
+
+package hyperscale.common;
+
+option java_multiple_files = true;
+option java_package = "dev.hyperscale.proto.common";
+
+// ── Timestamp ─────────────────────────────────────────────────────────────
+
+// UTC timestamp as ISO 8601 string for cross-language compatibility.
+message Timestamp {
+  string value = 1; // ISO 8601 format: "2024-01-15T10:30:00Z"
+}
+
+// ── Pagination ────────────────────────────────────────────────────────────
+
+message PaginationRequest {
+  int32 page = 1;        // 1-based page number
+  int32 page_size = 2;   // Items per page (max 100)
+  string sort_by = 3;    // Field name to sort by
+  string sort_order = 4; // "asc" or "desc"
+}
+
+message PaginationResponse {
+  int32 page = 1;
+  int32 page_size = 2;
+  int64 total_items = 3;
+  int32 total_pages = 4;
+  bool has_next = 5;
+  bool has_previous = 6;
+}
+
+// ── Money ─────────────────────────────────────────────────────────────────
+
+message Money {
+  int64 amount = 1;      // Amount in smallest currency unit (e.g., cents)
+  string currency = 2;   // ISO 4217 currency code (e.g., "USD")
+}
+
+// ── Address ───────────────────────────────────────────────────────────────
+
+message Address {
+  string line1 = 1;
+  string line2 = 2;
+  string city = 3;
+  string state = 4;
+  string postal_code = 5;
+  string country = 6;    // ISO 3166-1 alpha-2 (e.g., "US")
+  string phone = 7;
+}
+
+// ── Status Responses ──────────────────────────────────────────────────────
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+  }
+  ServingStatus status = 1;
+  string service_name = 2;
+  string version = 3;
+  Timestamp timestamp = 4;
+}
+
+// ── Error ─────────────────────────────────────────────────────────────────
+
+message ErrorResponse {
+  string code = 1;
+  string message = 2;
+  map<string, string> details = 3;
+}
+
+// ── Empty ─────────────────────────────────────────────────────────────────
+
+message Empty {}

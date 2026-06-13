@@ -1,0 +1,116 @@
+// HyperScale Platform — User Service gRPC Definition
+// Inter-service RPC interface for user management and authentication.
+
+syntax = "proto3";
+
+package hyperscale.user;
+
+import "common.proto";
+
+option java_multiple_files = true;
+option java_package = "dev.hyperscale.proto.user";
+
+// ── Service Definition ────────────────────────────────────────────────────
+
+service UserService {
+  // Get a single user by ID.
+  rpc GetUser(GetUserRequest) returns (UserResponse);
+
+  // Validate a JWT or Firebase token and return the decoded payload.
+  rpc ValidateToken(ValidateTokenRequest) returns (TokenPayload);
+
+  // Get all permissions for a user (resolved from roles).
+  rpc GetUserPermissions(UserIdRequest) returns (PermissionsResponse);
+
+  // Bulk fetch users by their IDs.
+  rpc BulkGetUsers(BulkUserRequest) returns (BulkUserResponse);
+
+  // Check if a user exists by email.
+  rpc CheckUserExists(CheckUserExistsRequest) returns (CheckUserExistsResponse);
+
+  // Health check.
+  rpc HealthCheck(hyperscale.common.Empty) returns (hyperscale.common.HealthCheckResponse);
+}
+
+// ── Request Messages ──────────────────────────────────────────────────────
+
+message GetUserRequest {
+  string user_id = 1;
+  bool include_profile = 2; // Whether to include the full profile
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+  string token_type = 2; // "jwt" or "firebase"
+}
+
+message UserIdRequest {
+  string user_id = 1;
+}
+
+message BulkUserRequest {
+  repeated string user_ids = 1;
+  int32 max_results = 2; // Limit (default 100)
+}
+
+message CheckUserExistsRequest {
+  string email = 1;
+}
+
+// ── Response Messages ─────────────────────────────────────────────────────
+
+message UserResponse {
+  string id = 1;
+  string email = 2;
+  string full_name = 3;
+  string phone = 4;
+  string avatar_url = 5;
+  repeated string roles = 6;
+  bool is_verified = 7;
+  bool is_active = 8;
+  string firebase_uid = 9;
+  hyperscale.common.Timestamp created_at = 10;
+  hyperscale.common.Timestamp last_login = 11;
+  UserProfile profile = 12;
+}
+
+message UserProfile {
+  string bio = 1;
+  map<string, string> social_links = 2;
+  map<string, string> preferences = 3;
+  string location = 4;
+}
+
+message TokenPayload {
+  string sub = 1;            // User ID
+  string token_type = 2;     // "access" or "refresh"
+  repeated string roles = 3;
+  repeated string permissions = 4;
+  string jti = 5;            // Token ID
+  int64 exp = 6;             // Expiration timestamp
+  int64 iat = 7;             // Issued-at timestamp
+  bool valid = 8;            // Whether the token is valid
+  string error = 9;          // Error message if invalid
+}
+
+message PermissionsResponse {
+  string user_id = 1;
+  repeated Permission permissions = 2;
+  repeated string roles = 3;
+}
+
+message Permission {
+  string resource = 1;
+  string action = 2;
+  map<string, string> conditions = 3;
+}
+
+message BulkUserResponse {
+  repeated UserResponse users = 1;
+  int32 total = 2;
+}
+
+message CheckUserExistsResponse {
+  bool exists = 1;
+  string user_id = 2;
+}

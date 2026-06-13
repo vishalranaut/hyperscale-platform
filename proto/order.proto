@@ -1,0 +1,108 @@
+// HyperScale Platform — Order Service gRPC Definition
+// Inter-service RPC interface for order management.
+
+syntax = "proto3";
+
+package hyperscale.order;
+
+import "common.proto";
+
+option java_multiple_files = true;
+option java_package = "dev.hyperscale.proto.order";
+
+// ── Service Definition ────────────────────────────────────────────────────
+
+service OrderService {
+  // Get a single order by ID.
+  rpc GetOrder(GetOrderRequest) returns (OrderResponse);
+
+  // Get orders for a specific user.
+  rpc GetUserOrders(GetUserOrdersRequest) returns (OrderListResponse);
+
+  // Get order status.
+  rpc GetOrderStatus(OrderStatusRequest) returns (OrderStatusResponse);
+
+  // Health check.
+  rpc HealthCheck(hyperscale.common.Empty) returns (hyperscale.common.HealthCheckResponse);
+}
+
+// ── Request Messages ──────────────────────────────────────────────────────
+
+message GetOrderRequest {
+  string order_id = 1;
+}
+
+message GetUserOrdersRequest {
+  string user_id = 1;
+  hyperscale.common.PaginationRequest pagination = 2;
+  string status_filter = 3; // Optional status filter
+}
+
+message OrderStatusRequest {
+  string order_id = 1;
+}
+
+// ── Response Messages ─────────────────────────────────────────────────────
+
+message OrderResponse {
+  string id = 1;
+  string user_id = 2;
+  repeated OrderItemResponse items = 3;
+  hyperscale.common.Money subtotal = 4;
+  hyperscale.common.Money tax = 5;
+  hyperscale.common.Money shipping = 6;
+  hyperscale.common.Money total = 7;
+  string status = 8;
+  PaymentInfoResponse payment = 9;
+  hyperscale.common.Address shipping_address = 10;
+  hyperscale.common.Address billing_address = 11;
+  TrackingInfoResponse tracking = 12;
+  string notes = 13;
+  hyperscale.common.Timestamp created_at = 14;
+  hyperscale.common.Timestamp updated_at = 15;
+}
+
+message OrderItemResponse {
+  string product_id = 1;
+  string variant_id = 2;
+  int32 quantity = 3;
+  hyperscale.common.Money unit_price = 4;
+  hyperscale.common.Money total_price = 5;
+  string product_title = 6;
+  string product_image = 7;
+}
+
+message PaymentInfoResponse {
+  string provider = 1;
+  string transaction_id = 2;
+  string status = 3;         // "pending", "captured", "failed", "refunded"
+  hyperscale.common.Money amount = 4;
+  hyperscale.common.Timestamp captured_at = 5;
+}
+
+message TrackingInfoResponse {
+  string carrier = 1;
+  string tracking_number = 2;
+  string tracking_url = 3;
+  string estimated_delivery = 4;
+  repeated TrackingEvent events = 5;
+}
+
+message TrackingEvent {
+  string status = 1;
+  string description = 2;
+  string location = 3;
+  hyperscale.common.Timestamp timestamp = 4;
+}
+
+message OrderListResponse {
+  repeated OrderResponse orders = 1;
+  hyperscale.common.PaginationResponse pagination = 2;
+}
+
+message OrderStatusResponse {
+  string order_id = 1;
+  string status = 2;
+  string status_description = 3;
+  hyperscale.common.Timestamp updated_at = 4;
+}
