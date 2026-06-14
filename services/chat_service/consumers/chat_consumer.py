@@ -3,6 +3,16 @@
 AsyncWebsocketConsumer implementing real-time chat with typing
 indicators, read receipts, and online presence tracking.
 
+Architectural Note (Senior Dev):
+    WebSockets maintain persistent stateful connections. In a clustered environment
+    with multiple pods, an individual user's socket is tied to a specific pod.
+    To allow users on different pods to chat, we use a Redis-backed Channel Layer
+    (pub/sub). 
+    
+    When User A sends a message, Pod A saves it to MongoDB and publishes it to
+    a Redis channel (e.g., `room_123`). All pods subscribed to `room_123` receive
+    the message and push it down their respective open WebSockets to connected clients.
+
 WebSocket Protocol (JSON):
     Client → Server:
         {"type": "message", "room_id": "...", "content": "...", "reply_to": "..."}

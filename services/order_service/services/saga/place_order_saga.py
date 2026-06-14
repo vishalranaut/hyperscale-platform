@@ -3,6 +3,16 @@
 Orchestrated saga pattern for order placement. Coordinates multiple
 service calls with compensation (rollback) logic on failure.
 
+Architectural Note (Senior Dev):
+    Distributed transactions across microservices cannot rely on ACID database
+    locks (like two-phase commit), as that creates tight coupling and severe
+    latency bottlenecks. Instead, we use the Saga Pattern.
+    
+    Here, the Order Service acts as the Orchestrator. It attempts to execute
+    a sequence of local transactions (Steps). If any step fails (e.g., payment
+    is declined), it runs "Compensations" (rollbacks) in reverse order to ensure
+    eventual consistency across the system.
+
 Saga Steps:
     1. ValidateCart — check items are still available
     2. ReserveInventory — gRPC call to product_service

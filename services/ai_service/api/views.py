@@ -9,13 +9,21 @@ from shared.auth.permissions import IsAuthenticated
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def get_recommendations(request: Request) -> Response:
-    """Get personalized recommendations."""
-    # Mock data for skeleton
+async def get_recommendations(request: Request) -> Response:
+    """Get personalized recommendations.
+    
+    Architectural Note (Senior Dev):
+        This endpoint avoids synchronous ML inference. It hits our MongoDB
+        pre-computed cache. If the cache misses, it returns a fast fallback
+        and triggers a background task (e.g., Celery) to compute for next time.
+    """
+    from services.ai_service.services.recommendation import RecommendationService
+    
+    user_id = request.user_payload.sub  # type: ignore[attr-defined]
+    service = RecommendationService()
+    
+    product_ids = await service.get_recommendations(user_id)
+    
     return Response({
-        "recommended_products": [
-            "prod_1",
-            "prod_2",
-            "prod_3",
-        ]
+        "recommended_products": product_ids
     })
