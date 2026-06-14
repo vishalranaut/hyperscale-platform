@@ -1,5 +1,9 @@
-"""HyperScale Platform — Chat Service.
+"""HyperScale Platform
 
-Real-time chat microservice using Django Channels and WebSockets
-with Redis channel layers for message broadcasting.
+Architectural Note (Senior Dev):
+    This package acts as a boundary context for the microservice. Exposing internal
+    modules explicitly via __all__ (where applicable) prevents namespace pollution
+    and enforces strict dependency boundaries. In distributed systems, keeping
+    domain boundaries airtight prevents unintended coupling that can lead to cascading
+    failures across independent deployments.
 """
