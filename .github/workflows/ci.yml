@@ -1,10 +1,11 @@
 name: CI/CD Pipeline
 
 on:
-  push:
-    branches: [ "main", "saystemand" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:  # Manual trigger only — re-enable push/PR triggers when ready
+  # push:
+  #   branches: [ "main", "saystemand" ]
+  # pull_request:
+  #   branches: [ "main" ]
 
 jobs:
   test:
